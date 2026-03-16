@@ -28,4 +28,8 @@ public class Task {
         this.done = false;
         this.updatedAt = this.createdAt = LocalDateTime.now();
     }
+
+    public void update() {
+        updatedAt = LocalDateTime.now();
+    }
 }

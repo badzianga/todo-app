@@ -2,6 +2,7 @@ package com.badzianga.todo.controller;
 
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
+import com.badzianga.todo.request.UpdateTaskRequest;
 import com.badzianga.todo.response.ApiResponse;
 import com.badzianga.todo.service.ITaskService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,16 @@ public class TaskController {
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (Exception e) {
             return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateTask(@PathVariable Long id, @RequestBody UpdateTaskRequest request) {
+        try {
+            Task task = taskService.updateTask(request, id);
+            return ResponseEntity.ok(new ApiResponse("Success", task));
+        } catch (Exception e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 }
