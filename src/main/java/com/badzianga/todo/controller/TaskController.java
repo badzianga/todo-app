@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("${api.prefix}/tasks")
@@ -22,6 +23,16 @@ public class TaskController {
     public ResponseEntity<ApiResponse> getAllTasks() {
         List<Task> tasks = taskService.getTasks();
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getTask(@PathVariable Long id) {
+        try {
+            Task task = taskService.getTask(id);
+            return ResponseEntity.ok(new ApiResponse("Success", task));
+        } catch (Exception e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
     @PostMapping

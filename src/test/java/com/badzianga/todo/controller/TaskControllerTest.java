@@ -49,6 +49,35 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void shouldReturnTaskById() throws Exception {
+        Long id = 1L;
+        Task task = new Task("title1", "description1");
+        task.setId(id);
+
+        Mockito.when(taskService.getTask(id)).thenReturn(task);
+
+        mvc.perform(MockMvcRequestBuilders.get(url + '/' + id).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Success"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(id))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.title").value("title1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.description").value("description1"));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenTaskWithGivenIdNotFound() throws Exception {
+        Long id = 1L;
+        Mockito.when(taskService.getTask(id)).thenThrow(new RuntimeException("message"));
+
+        mvc.perform(MockMvcRequestBuilders.get(url + '/' + id).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new AddTaskRequest())))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("message"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
     public void shouldAddTask() throws Exception {
         AddTaskRequest request = new AddTaskRequest();
         request.setTitle("title");

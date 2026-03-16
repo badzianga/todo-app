@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ITaskService {
     List<Task> getTasks();
+    Task getTask(Long id);
     Task addTask(AddTaskRequest request);
 }

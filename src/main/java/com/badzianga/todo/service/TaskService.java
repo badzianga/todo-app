@@ -19,6 +19,11 @@ public class TaskService implements ITaskService {
     }
 
     @Override
+    public Task getTask(Long id) {
+        return taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
+    @Override
     public Task addTask(AddTaskRequest request) {
         if (taskRepository.existsByTitle(request.getTitle())) {
             throw new RuntimeException("Task with given title already exists");

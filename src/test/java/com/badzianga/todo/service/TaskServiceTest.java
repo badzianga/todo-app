@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TaskServiceTest {
     private TaskRepository taskRepository;
@@ -30,10 +31,35 @@ public class TaskServiceTest {
 
         List<Task> tasks = taskService.getTasks();
 
+        Mockito.verify(taskRepository, Mockito.times(1)).findAll();
         Assertions.assertThat(tasks).hasSize(3);
         Assertions.assertThat(tasks.get(0)).isEqualTo(task1);
         Assertions.assertThat(tasks.get(1)).isEqualTo(task2);
         Assertions.assertThat(tasks.get(2)).isEqualTo(task3);
+    }
+
+    @Test
+    public void shouldGetTaskById() {
+        Long id = 1L;
+        Task task1 = new Task("title1", "description1");
+        task1.setId(id);
+
+        Mockito.when(taskRepository.findById(id)).thenReturn(Optional.of(task1));
+
+        Task task = taskService.getTask(id);
+
+        Assertions.assertThat(task).isEqualTo(task1);
+        Mockito.verify(taskRepository, Mockito.times(1)).findById(id);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfTaskNotFound() {
+        Long id = 1L;
+        Mockito.when(taskRepository.findById(id)).thenThrow(new RuntimeException());
+
+        Assertions.assertThatThrownBy(() -> taskService.getTask(id))
+                .isInstanceOf(RuntimeException.class);
+        Mockito.verify(taskRepository, Mockito.times(1)).findById(id);
     }
 
     @Test
