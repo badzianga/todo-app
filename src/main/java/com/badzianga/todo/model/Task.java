@@ -21,4 +21,11 @@ public class Task {
     private boolean done;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Task(String title, String description) {
+        this.title = title;
+        this.description = description;
+        this.done = false;
+        this.updatedAt = this.createdAt = LocalDateTime.now();
+    }
 }
