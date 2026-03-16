@@ -11,4 +11,5 @@ public interface ITaskService {
     Task getTask(Long id);
     Task addTask(AddTaskRequest request);
     Task updateTask(UpdateTaskRequest request, Long id);
+    Task updateTaskStatus(Long id);
 }

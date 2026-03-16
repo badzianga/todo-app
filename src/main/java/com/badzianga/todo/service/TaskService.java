@@ -43,10 +43,24 @@ public class TaskService implements ITaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
+    @Override
+    public Task updateTaskStatus(Long id) {
+        return taskRepository.findById(id)
+                .map(this::swapTaskStatus)
+                .map(taskRepository::save)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
     private Task updateExistingTask(Task task, UpdateTaskRequest request) {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setDone(request.isDone());
+        task.update();
+        return task;
+    }
+
+    private Task swapTaskStatus(Task task) {
+        task.setDone(!task.isDone());
         task.update();
         return task;
     }

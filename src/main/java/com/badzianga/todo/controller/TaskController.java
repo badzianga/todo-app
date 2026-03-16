@@ -55,4 +55,14 @@ public class TaskController {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateTaskStatus(@PathVariable Long id) {
+        try {
+            Task task = taskService.updateTaskStatus(id);
+            return ResponseEntity.ok(new ApiResponse("Success", task));
+        } catch (Exception e) {
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
 }
