@@ -23,8 +23,13 @@ public class TaskController {
     private final ITaskService taskService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllTasks() {
-        List<Task> tasks = taskService.getTasks();
+    public ResponseEntity<ApiResponse> getTasks(@RequestParam(required = false) Boolean done) {
+        List<Task> tasks;
+        if (done == null) {
+            tasks = taskService.getTasks();
+        } else {
+            tasks = taskService.getTasks(done);
+        }
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 

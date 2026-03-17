@@ -22,6 +22,11 @@ public class TaskService implements ITaskService {
     }
 
     @Override
+    public List<Task> getTasks(boolean done) {
+        return taskRepository.findByDone(done);
+    }
+
+    @Override
     public Task getTask(Long id) throws TaskNotFoundException {
         return taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
     }

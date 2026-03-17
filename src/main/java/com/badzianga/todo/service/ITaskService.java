@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ITaskService {
     List<Task> getTasks();
+    List<Task> getTasks(boolean done);
     Task getTask(Long id);
     Task addTask(AddTaskRequest request);
     Task updateTask(UpdateTaskRequest request, Long id);
