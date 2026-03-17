@@ -1,5 +1,7 @@
 package com.badzianga.todo.service;
 
+import com.badzianga.todo.exception.TaskAlreadyExistsException;
+import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.request.AddTaskRequest;
 import org.assertj.core.api.Assertions;
 import com.badzianga.todo.model.Task;
@@ -55,10 +57,10 @@ public class TaskServiceTest {
     @Test
     public void shouldThrowExceptionIfTaskNotFound() {
         Long id = 1L;
-        Mockito.when(taskRepository.findById(id)).thenThrow(new RuntimeException());
+        Mockito.when(taskRepository.findById(id)).thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(() -> taskService.getTask(id))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(TaskNotFoundException.class);
         Mockito.verify(taskRepository, Mockito.times(1)).findById(id);
     }
 
@@ -94,7 +96,7 @@ public class TaskServiceTest {
         Mockito.when(taskRepository.existsByTitle(Mockito.anyString())).thenReturn(true);
 
         Assertions.assertThatThrownBy(() -> taskService.addTask(request))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(TaskAlreadyExistsException.class);
         Mockito.verify(taskRepository, Mockito.times(1)).existsByTitle(Mockito.anyString());
         Mockito.verify(taskRepository, Mockito.never()).save(Mockito.any());
     }

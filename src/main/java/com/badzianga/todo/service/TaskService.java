@@ -1,5 +1,7 @@
 package com.badzianga.todo.service;
 
+import com.badzianga.todo.exception.TaskAlreadyExistsException;
+import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.repository.TaskRepository;
 import com.badzianga.todo.request.AddTaskRequest;
@@ -20,14 +22,14 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public Task getTask(Long id) {
-        return taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+    public Task getTask(Long id) throws TaskNotFoundException {
+        return taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
     }
 
     @Override
-    public Task addTask(AddTaskRequest request) {
+    public Task addTask(AddTaskRequest request)  throws TaskAlreadyExistsException {
         if (taskRepository.existsByTitle(request.getTitle())) {
-            throw new RuntimeException("Task with given title already exists");
+            throw new TaskAlreadyExistsException("Task with given title already exists");
         }
 
         Task task = new Task(request.getTitle(), request.getDescription());
@@ -36,25 +38,25 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public Task updateTask(UpdateTaskRequest request, Long id) {
+    public Task updateTask(UpdateTaskRequest request, Long id) throws TaskNotFoundException {
         return taskRepository.findById(id)
                 .map(task -> updateExistingTask(task, request))
                 .map(taskRepository::save)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(TaskNotFoundException::new);
     }
 
     @Override
-    public Task updateTaskStatus(Long id) {
+    public Task updateTaskStatus(Long id) throws TaskNotFoundException {
         return taskRepository.findById(id)
                 .map(this::swapTaskStatus)
                 .map(taskRepository::save)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(TaskNotFoundException::new);
     }
 
     @Override
-    public void deleteTask(Long id) {
+    public void deleteTask(Long id) throws TaskNotFoundException {
         taskRepository.findById(id).ifPresentOrElse(taskRepository::delete, () -> {
-            throw new RuntimeException("Task not found");
+            throw new TaskNotFoundException();
         });
     }
 

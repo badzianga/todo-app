@@ -1,5 +1,7 @@
 package com.badzianga.todo.controller;
 
+import com.badzianga.todo.exception.TaskAlreadyExistsException;
+import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
@@ -31,7 +33,7 @@ public class TaskController {
         try {
             Task task = taskService.getTask(id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
-        } catch (Exception e) {
+        } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
@@ -41,7 +43,7 @@ public class TaskController {
         try {
             Task task = taskService.addTask(request);
             return ResponseEntity.ok(new ApiResponse("Success", task));
-        } catch (Exception e) {
+        } catch (TaskAlreadyExistsException e) {
             return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
         }
     }
@@ -51,7 +53,7 @@ public class TaskController {
         try {
             Task task = taskService.updateTask(request, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
-        } catch (Exception e) {
+        } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
@@ -61,7 +63,7 @@ public class TaskController {
         try {
             Task task = taskService.updateTaskStatus(id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
-        } catch (Exception e) {
+        } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
@@ -71,7 +73,7 @@ public class TaskController {
         try {
             taskService.deleteTask(id);
             return ResponseEntity.ok(new ApiResponse("Success", null));
-        } catch (Exception e) {
+        } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }

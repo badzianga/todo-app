@@ -1,5 +1,7 @@
 package com.badzianga.todo.controller;
 
+import com.badzianga.todo.exception.TaskAlreadyExistsException;
+import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.service.TaskService;
@@ -68,12 +70,12 @@ public class TaskControllerTest {
     @Test
     public void shouldThrowExceptionWhenTaskWithGivenIdNotFound() throws Exception {
         Long id = 1L;
-        Mockito.when(taskService.getTask(id)).thenThrow(new RuntimeException("message"));
+        Mockito.when(taskService.getTask(id)).thenThrow(new TaskNotFoundException());
 
         mvc.perform(MockMvcRequestBuilders.get(url + '/' + id).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new AddTaskRequest())))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("message"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 
@@ -99,12 +101,12 @@ public class TaskControllerTest {
 
     @Test
     public void shouldThrowExceptionWhenAddingTaskWithExistingName() throws Exception {
-        Mockito.when(taskService.addTask(Mockito.any())).thenThrow(new RuntimeException("error message"));
+        Mockito.when(taskService.addTask(Mockito.any())).thenThrow(new TaskAlreadyExistsException("message"));
 
         mvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new AddTaskRequest())))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("error message"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("message"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 }
