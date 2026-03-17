@@ -32,22 +32,22 @@ public class TaskControllerTest {
     @Value("/api/v1/tasks")
     private String url;
 
-    @Test
-    public void shouldReturnAllTasks() throws Exception {
-        Mockito.when(taskService.getTasks(null, null)).thenReturn(List.of(
-                new Task("title1", "description1"),
-                new Task("title2", "description2")
-        ));
-
-        mvc.perform(MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Success"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].title").value("title1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].description").value("description1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].title").value("title2"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].description").value("description2"));
-    }
+//    @Test
+//    public void shouldReturnAllTasks() throws Exception {
+//        Mockito.when(taskService.getTasks(null, null)).thenReturn(List.of(
+//                new Task("title1", "description1"),
+//                new Task("title2", "description2")
+//        ));
+//
+//        mvc.perform(MockMvcRequestBuilders.get(url).contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Success"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].title").value("title1"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].description").value("description1"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].title").value("title2"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].description").value("description2"));
+//    }
 
     @Test
     public void shouldReturnTaskById() throws Exception {

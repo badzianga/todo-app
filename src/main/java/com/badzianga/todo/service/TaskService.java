@@ -6,9 +6,9 @@ import com.badzianga.todo.repository.TaskRepository;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,16 +16,16 @@ public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
 
     @Override
-    public List<Task> getTasks(Boolean done, String title) {
+    public Page<Task> getTasks(Pageable pageable, Boolean done, String title) {
         if (done == null && title == null) {
-            return taskRepository.findAll();
+            return taskRepository.findAll(pageable);
         }
         if (done != null && title != null) {
-            return taskRepository.findByDoneAndTitleContainingIgnoreCase(done, title);
+            return taskRepository.findByDoneAndTitleContainingIgnoreCase(pageable, done, title);
         }
         return done != null
-                ? taskRepository.findByDone(done)
-                : taskRepository.findByTitleContainingIgnoreCase(title);
+                ? taskRepository.findByDone(pageable, done)
+                : taskRepository.findByTitleContainingIgnoreCase(pageable, title);
     }
 
     @Override
