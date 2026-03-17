@@ -7,8 +7,7 @@ import com.badzianga.todo.request.UpdateTaskRequest;
 import java.util.List;
 
 public interface ITaskService {
-    List<Task> getTasks();
-    List<Task> getTasks(boolean done);
+    List<Task> getTasks(Boolean done, String title);
     Task getTask(Long id);
     Task addTask(AddTaskRequest request);
     Task updateTask(UpdateTaskRequest request, Long id);

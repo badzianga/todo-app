@@ -30,7 +30,7 @@ public class TaskServiceTest {
 
         Mockito.when(taskRepository.findAll()).thenReturn(List.of(task1, task2, task3));
 
-        List<Task> tasks = taskService.getTasks();
+        List<Task> tasks = taskService.getTasks(null, null);
 
         Mockito.verify(taskRepository, Mockito.times(1)).findAll();
         Assertions.assertThat(tasks).hasSize(3);

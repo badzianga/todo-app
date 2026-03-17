@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByDone(boolean done);
+    List<Task> findByTitleContainingIgnoreCase(String title);
+    List<Task> findByDoneAndTitleContainingIgnoreCase(boolean done, String title);
 }

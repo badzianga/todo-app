@@ -21,13 +21,9 @@ public class TaskController {
     private final ITaskService taskService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getTasks(@RequestParam(required = false) Boolean done) {
-        List<Task> tasks;
-        if (done == null) {
-            tasks = taskService.getTasks();
-        } else {
-            tasks = taskService.getTasks(done);
-        }
+    public ResponseEntity<ApiResponse> getTasks(@RequestParam(required = false) Boolean done,
+                                                @RequestParam(required = false) String title) {
+        List<Task> tasks = taskService.getTasks(done, title);
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 

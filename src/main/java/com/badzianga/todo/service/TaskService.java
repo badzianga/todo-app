@@ -16,13 +16,16 @@ public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
 
     @Override
-    public List<Task> getTasks() {
-        return taskRepository.findAll();
-    }
-
-    @Override
-    public List<Task> getTasks(boolean done) {
-        return taskRepository.findByDone(done);
+    public List<Task> getTasks(Boolean done, String title) {
+        if (done == null && title == null) {
+            return taskRepository.findAll();
+        }
+        if (done != null && title != null) {
+            return taskRepository.findByDoneAndTitleContainingIgnoreCase(done, title);
+        }
+        return done != null
+                ? taskRepository.findByDone(done)
+                : taskRepository.findByTitleContainingIgnoreCase(title);
     }
 
     @Override

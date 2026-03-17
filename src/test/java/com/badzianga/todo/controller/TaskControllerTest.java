@@ -34,7 +34,7 @@ public class TaskControllerTest {
 
     @Test
     public void shouldReturnAllTasks() throws Exception {
-        Mockito.when(taskService.getTasks()).thenReturn(List.of(
+        Mockito.when(taskService.getTasks(null, null)).thenReturn(List.of(
                 new Task("title1", "description1"),
                 new Task("title2", "description2")
         ));
