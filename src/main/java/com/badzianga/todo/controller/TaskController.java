@@ -1,6 +1,5 @@
 package com.badzianga.todo.controller;
 
-import com.badzianga.todo.exception.TaskAlreadyExistsException;
 import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
@@ -45,12 +43,8 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<ApiResponse> createTask(@RequestBody AddTaskRequest request) {
-        try {
-            Task task = taskService.addTask(request);
-            return ResponseEntity.ok(new ApiResponse("Success", task));
-        } catch (TaskAlreadyExistsException e) {
-            return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
-        }
+        Task task = taskService.addTask(request);
+        return ResponseEntity.ok(new ApiResponse("Success", task));
     }
 
     @PutMapping("/{id}")

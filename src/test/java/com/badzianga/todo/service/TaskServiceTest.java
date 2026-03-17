@@ -1,6 +1,5 @@
 package com.badzianga.todo.service;
 
-import com.badzianga.todo.exception.TaskAlreadyExistsException;
 import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.request.AddTaskRequest;
 import org.assertj.core.api.Assertions;
@@ -73,7 +72,6 @@ public class TaskServiceTest {
         request.setDescription(description);
         Task task = new Task(title, description);
 
-        Mockito.when(taskRepository.existsByTitle(title)).thenReturn(false);
         Mockito.when(taskRepository.save(Mockito.any(Task.class))).thenReturn(task);
 
         Task addedTask = taskService.addTask(request);
@@ -83,21 +81,6 @@ public class TaskServiceTest {
         Assertions.assertThat(addedTask.getDescription()).isEqualTo(description);
         Assertions.assertThat(addedTask.getCreatedAt()).isNotNull();
         Assertions.assertThat(addedTask.getUpdatedAt()).isNotNull();
-        Mockito.verify(taskRepository, Mockito.times(1)).existsByTitle(Mockito.anyString());
         Mockito.verify(taskRepository, Mockito.times(1)).save(Mockito.any(Task.class));
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenAddingTaskWithExistingTitle() {
-        AddTaskRequest request = new AddTaskRequest();
-        request.setTitle("title");
-        request.setDescription("description");
-
-        Mockito.when(taskRepository.existsByTitle(Mockito.anyString())).thenReturn(true);
-
-        Assertions.assertThatThrownBy(() -> taskService.addTask(request))
-                .isInstanceOf(TaskAlreadyExistsException.class);
-        Mockito.verify(taskRepository, Mockito.times(1)).existsByTitle(Mockito.anyString());
-        Mockito.verify(taskRepository, Mockito.never()).save(Mockito.any());
     }
 }

@@ -1,6 +1,5 @@
 package com.badzianga.todo.controller;
 
-import com.badzianga.todo.exception.TaskAlreadyExistsException;
 import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
@@ -97,16 +96,5 @@ public class TaskControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.done").value(task.isDone()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.createdAt").value(task.getCreatedAt().toString()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.updatedAt").value(task.getUpdatedAt().toString()));
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenAddingTaskWithExistingName() throws Exception {
-        Mockito.when(taskService.addTask(Mockito.any())).thenThrow(new TaskAlreadyExistsException("message"));
-
-        mvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new AddTaskRequest())))
-                .andExpect(MockMvcResultMatchers.status().isConflict())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("message"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 }

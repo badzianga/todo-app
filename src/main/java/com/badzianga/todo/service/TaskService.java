@@ -1,6 +1,5 @@
 package com.badzianga.todo.service;
 
-import com.badzianga.todo.exception.TaskAlreadyExistsException;
 import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.model.Task;
 import com.badzianga.todo.repository.TaskRepository;
@@ -32,13 +31,8 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public Task addTask(AddTaskRequest request)  throws TaskAlreadyExistsException {
-        if (taskRepository.existsByTitle(request.getTitle())) {
-            throw new TaskAlreadyExistsException("Task with given title already exists");
-        }
-
+    public Task addTask(AddTaskRequest request) {
         Task task = new Task(request.getTitle(), request.getDescription());
-
         return taskRepository.save(task);
     }
 
