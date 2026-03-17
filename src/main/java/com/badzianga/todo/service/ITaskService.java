@@ -12,4 +12,5 @@ public interface ITaskService {
     Task addTask(AddTaskRequest request);
     Task updateTask(UpdateTaskRequest request, Long id);
     Task updateTaskStatus(Long id);
+    void deleteTask(Long id);
 }
