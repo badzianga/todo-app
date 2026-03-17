@@ -7,10 +7,12 @@ import com.badzianga.todo.request.UpdateTaskRequest;
 import com.badzianga.todo.response.ApiResponse;
 import com.badzianga.todo.service.ITaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -21,9 +23,11 @@ public class TaskController {
     private final ITaskService taskService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getTasks(@RequestParam(required = false) Boolean done,
+    public ResponseEntity<ApiResponse> getTasks(@PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+                                                    Pageable pageable,
+                                                @RequestParam(required = false) Boolean done,
                                                 @RequestParam(required = false) String title) {
-        List<Task> tasks = taskService.getTasks(done, title);
+        Page<Task> tasks = taskService.getTasks(pageable, done, title);
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 
