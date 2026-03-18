@@ -6,6 +6,7 @@ import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
 import com.badzianga.todo.response.ApiResponse;
 import com.badzianga.todo.service.ITaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,13 +43,13 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createTask(@RequestBody AddTaskRequest request) {
+    public ResponseEntity<ApiResponse> createTask(@Valid @RequestBody AddTaskRequest request) {
         Task task = taskService.addTask(request);
         return ResponseEntity.ok(new ApiResponse("Success", task));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateTask(@PathVariable Long id, @RequestBody UpdateTaskRequest request) {
+    public ResponseEntity<ApiResponse> updateTask(@PathVariable Long id, @Valid @RequestBody UpdateTaskRequest request) {
         try {
             Task task = taskService.updateTask(request, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
