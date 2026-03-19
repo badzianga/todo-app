@@ -18,15 +18,13 @@ public class User {
     private Long id;
 
     private String email;
-    private String username;
     private String password;
 
     @OneToMany(mappedBy = "user")
     private List<Task> tasks;
 
-    public User(String email, String username, String password) {
+    public User(String email, String password) {
         this.email = email;
-        this.username = username;
         this.password = password;
     }
 }
