@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
-@RequestMapping("${api.prefix}/tasks")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
     private final ITaskService taskService;
