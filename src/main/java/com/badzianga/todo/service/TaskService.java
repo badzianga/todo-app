@@ -1,8 +1,11 @@
 package com.badzianga.todo.service;
 
 import com.badzianga.todo.exception.TaskNotFoundException;
+import com.badzianga.todo.exception.UserNotFoundException;
 import com.badzianga.todo.model.Task;
+import com.badzianga.todo.model.User;
 import com.badzianga.todo.repository.TaskRepository;
+import com.badzianga.todo.repository.UserRepository;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Page<Task> getTasks(Pageable pageable, Boolean done, String title) {
@@ -34,8 +38,9 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public Task addTask(AddTaskRequest request) {
-        Task task = new Task(request.getTitle(), request.getDescription());
+    public Task addTask(String email, AddTaskRequest request) {
+        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
+        Task task = new Task(request.getTitle(), request.getDescription(), user);
         return taskRepository.save(task);
     }
 

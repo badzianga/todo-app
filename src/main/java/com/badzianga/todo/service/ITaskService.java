@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface ITaskService {
     Page<Task> getTasks(Pageable pageable, Boolean done, String title);
     Task getTask(Long id);
-    Task addTask(AddTaskRequest request);
+    Task addTask(String email, AddTaskRequest request);
     Task updateTask(UpdateTaskRequest request, Long id);
     Task updateTaskStatus(Long id);
     void deleteTask(Long id);

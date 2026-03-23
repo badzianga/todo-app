@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -24,16 +26,22 @@ public class TaskController {
     private final ITaskService taskService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getTasks(@PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+    public ResponseEntity<ApiResponse> getTasks(@AuthenticationPrincipal UserDetails user,
+                                                @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
                                                     Pageable pageable,
                                                 @RequestParam(required = false) Boolean done,
                                                 @RequestParam(required = false) String title) {
+        System.out.println(user.getUsername());
+        System.out.println(user.getPassword());
+        System.out.println(user.getAuthorities());
+
         Page<Task> tasks = taskService.getTasks(pageable, done, title);
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getTask(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> getTask(@AuthenticationPrincipal UserDetails user,
+                                               @PathVariable Long id) {
         try {
             Task task = taskService.getTask(id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
@@ -43,13 +51,16 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createTask(@Valid @RequestBody AddTaskRequest request) {
-        Task task = taskService.addTask(request);
+    public ResponseEntity<ApiResponse> createTask(@AuthenticationPrincipal UserDetails user,
+                                                  @Valid @RequestBody AddTaskRequest request) {
+        Task task = taskService.addTask(user.getUsername(), request);
         return ResponseEntity.ok(new ApiResponse("Success", task));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateTask(@PathVariable Long id, @Valid @RequestBody UpdateTaskRequest request) {
+    public ResponseEntity<ApiResponse> updateTask(@AuthenticationPrincipal UserDetails user,
+                                                  @PathVariable Long id,
+                                                  @Valid @RequestBody UpdateTaskRequest request) {
         try {
             Task task = taskService.updateTask(request, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
@@ -59,7 +70,8 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateTaskStatus(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> updateTaskStatus(@AuthenticationPrincipal UserDetails user,
+                                                        @PathVariable Long id) {
         try {
             Task task = taskService.updateTaskStatus(id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
@@ -69,7 +81,8 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> deleteTask(@AuthenticationPrincipal UserDetails user,
+                                                  @PathVariable Long id) {
         try {
             taskService.deleteTask(id);
             return ResponseEntity.ok(new ApiResponse("Success", null));

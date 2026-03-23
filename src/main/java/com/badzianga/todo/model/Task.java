@@ -26,11 +26,12 @@ public class Task {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Task(String title, String description) {
+    public Task(String title, String description, User user) {
         this.title = title;
         this.description = description;
         this.done = false;
         this.updatedAt = this.createdAt = LocalDateTime.now();
+        this.user = user;
     }
 
     public void update() {
