@@ -1,10 +1,10 @@
 package com.badzianga.todo.controller;
 
 import com.badzianga.todo.exception.TaskNotFoundException;
-import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
 import com.badzianga.todo.response.ApiResponse;
+import com.badzianga.todo.response.TaskDTO;
 import com.badzianga.todo.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class TaskController {
                                                 @RequestParam(required = false) Boolean done,
                                                 @RequestParam(required = false) String title) {
 
-        Page<Task> tasks = taskService.getTasks(user, pageable, done, title);
+        Page<TaskDTO> tasks = taskService.getTasks(user, pageable, done, title);
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 
@@ -40,7 +40,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse> getTask(@AuthenticationPrincipal UserDetails user,
                                                @PathVariable Long id) {
         try {
-            Task task = taskService.getTask(user, id);
+            TaskDTO task = taskService.getTask(user, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -50,7 +50,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<ApiResponse> createTask(@AuthenticationPrincipal UserDetails user,
                                                   @Valid @RequestBody AddTaskRequest request) {
-        Task task = taskService.addTask(user, request);
+        TaskDTO task = taskService.addTask(user, request);
         return ResponseEntity.ok(new ApiResponse("Success", task));
     }
 
@@ -59,7 +59,7 @@ public class TaskController {
                                                   @PathVariable Long id,
                                                   @Valid @RequestBody UpdateTaskRequest request) {
         try {
-            Task task = taskService.updateTask(user, request, id);
+            TaskDTO task = taskService.updateTask(user, request, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -70,7 +70,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse> updateTaskStatus(@AuthenticationPrincipal UserDetails user,
                                                         @PathVariable Long id) {
         try {
-            Task task = taskService.updateTaskStatus(user, id);
+            TaskDTO task = taskService.updateTaskStatus(user, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));

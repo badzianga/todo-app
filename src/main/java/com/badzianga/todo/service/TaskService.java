@@ -9,6 +9,7 @@ import com.badzianga.todo.repository.TaskRepository;
 import com.badzianga.todo.repository.UserRepository;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
+import com.badzianga.todo.response.TaskDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,37 +22,39 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    public Page<Task> getTasks(UserDetails userDetails, Pageable pageable, Boolean done, String title) {
+    public Page<TaskDTO> getTasks(UserDetails userDetails, Pageable pageable, Boolean done, String title) {
         User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
         if (done == null && title == null) {
-            return taskRepository.findByUser(user, pageable);
+            return taskRepository.findByUser(user, pageable)
+                    .map(TaskDTO::new);
         }
         if (done != null && title != null) {
-            return taskRepository.findByUserAndDoneAndTitleContainingIgnoreCase(user, done, title, pageable);
+            return taskRepository.findByUserAndDoneAndTitleContainingIgnoreCase(user, done, title, pageable)
+                    .map(TaskDTO::new);
         }
         return done != null
-                ? taskRepository.findByUserAndDone(user, done, pageable)
-                : taskRepository.findByUserAndTitleContainingIgnoreCase(user, title, pageable);
+                ? taskRepository.findByUserAndDone(user, done, pageable).map(TaskDTO::new)
+                : taskRepository.findByUserAndTitleContainingIgnoreCase(user, title, pageable).map(TaskDTO::new);
     }
 
-    public Task getTask(UserDetails user, Long id) throws TaskNotFoundException {
+    public TaskDTO getTask(UserDetails user, Long id) throws TaskNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
         if (!task.getUser().getEmail().equals(user.getUsername())) {
             throw new InvalidUserException();
         }
-        return task;
+        return new TaskDTO(task);
     }
 
-    public Task addTask(UserDetails userDetails, AddTaskRequest request) {
+    public TaskDTO addTask(UserDetails userDetails, AddTaskRequest request) {
         User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
         Task task = new Task(request.getTitle(), request.getDescription(), user);
-        return taskRepository.save(task);
+        return new TaskDTO(taskRepository.save(task));
     }
 
-    public Task updateTask(UserDetails userDetails, UpdateTaskRequest request, Long id)
+    public TaskDTO updateTask(UserDetails userDetails, UpdateTaskRequest request, Long id)
             throws TaskNotFoundException, InvalidUserException {
         User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
@@ -63,10 +66,11 @@ public class TaskService {
                     return updateExistingTask(task, request);
                 })
                 .map(taskRepository::save)
+                .map(TaskDTO::new)
                 .orElseThrow(TaskNotFoundException::new);
     }
 
-    public Task updateTaskStatus(UserDetails user, Long id)
+    public TaskDTO updateTaskStatus(UserDetails user, Long id)
             throws TaskNotFoundException, InvalidUserException {
         return taskRepository.findById(id)
                 .map(task -> {
@@ -76,6 +80,7 @@ public class TaskService {
                     return swapTaskStatus(task);
                 })
                 .map(taskRepository::save)
+                .map(TaskDTO::new)
                 .orElseThrow(TaskNotFoundException::new);
     }
 
