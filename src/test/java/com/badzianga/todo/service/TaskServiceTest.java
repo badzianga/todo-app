@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class TaskServiceTest {
     private TaskRepository taskRepository;
-    private ITaskService taskService;
+    private TaskService taskService;
 
     @BeforeEach
     public void setup() {

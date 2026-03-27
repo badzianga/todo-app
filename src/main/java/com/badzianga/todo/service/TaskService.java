@@ -1,5 +1,6 @@
 package com.badzianga.todo.service;
 
+import com.badzianga.todo.exception.InvalidUserException;
 import com.badzianga.todo.exception.TaskNotFoundException;
 import com.badzianga.todo.exception.UserNotFoundException;
 import com.badzianga.todo.model.Task;
@@ -11,58 +12,80 @@ import com.badzianga.todo.request.UpdateTaskRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TaskService implements ITaskService {
+public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    @Override
-    public Page<Task> getTasks(Pageable pageable, Boolean done, String title) {
+    public Page<Task> getTasks(UserDetails userDetails, Pageable pageable, Boolean done, String title) {
+        User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
         if (done == null && title == null) {
-            return taskRepository.findAll(pageable);
+            return taskRepository.findByUser(user, pageable);
         }
         if (done != null && title != null) {
-            return taskRepository.findByDoneAndTitleContainingIgnoreCase(pageable, done, title);
+            return taskRepository.findByUserAndDoneAndTitleContainingIgnoreCase(user, done, title, pageable);
         }
         return done != null
-                ? taskRepository.findByDone(pageable, done)
-                : taskRepository.findByTitleContainingIgnoreCase(pageable, title);
+                ? taskRepository.findByUserAndDone(user, done, pageable)
+                : taskRepository.findByUserAndTitleContainingIgnoreCase(user, title, pageable);
     }
 
-    @Override
-    public Task getTask(Long id) throws TaskNotFoundException {
-        return taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
+    public Task getTask(UserDetails user, Long id) throws TaskNotFoundException {
+        Task task = taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
+        if (!task.getUser().getEmail().equals(user.getUsername())) {
+            throw new InvalidUserException();
+        }
+        return task;
     }
 
-    @Override
-    public Task addTask(String email, AddTaskRequest request) {
-        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
+    public Task addTask(UserDetails userDetails, AddTaskRequest request) {
+        User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
         Task task = new Task(request.getTitle(), request.getDescription(), user);
         return taskRepository.save(task);
     }
 
-    @Override
-    public Task updateTask(UpdateTaskRequest request, Long id) throws TaskNotFoundException {
+    public Task updateTask(UserDetails userDetails, UpdateTaskRequest request, Long id)
+            throws TaskNotFoundException, InvalidUserException {
+        User user = userRepository.findByEmailIgnoreCase(userDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
         return taskRepository.findById(id)
-                .map(task -> updateExistingTask(task, request))
+                .map(task -> {
+                    if (!task.getUser().getEmail().equals(user.getEmail())) {
+                        throw new InvalidUserException();
+                    }
+                    return updateExistingTask(task, request);
+                })
                 .map(taskRepository::save)
                 .orElseThrow(TaskNotFoundException::new);
     }
 
-    @Override
-    public Task updateTaskStatus(Long id) throws TaskNotFoundException {
+    public Task updateTaskStatus(UserDetails user, Long id)
+            throws TaskNotFoundException, InvalidUserException {
         return taskRepository.findById(id)
-                .map(this::swapTaskStatus)
+                .map(task -> {
+                    if (!task.getUser().getEmail().equals(user.getUsername())) {
+                        throw new InvalidUserException();
+                    }
+                    return swapTaskStatus(task);
+                })
                 .map(taskRepository::save)
                 .orElseThrow(TaskNotFoundException::new);
     }
 
-    @Override
-    public void deleteTask(Long id) throws TaskNotFoundException {
-        taskRepository.findById(id).ifPresentOrElse(taskRepository::delete, () -> {
+    public void deleteTask(UserDetails user, Long id) throws TaskNotFoundException, InvalidUserException {
+        taskRepository.findById(id).ifPresentOrElse(task -> {
+            if (!task.getUser().getEmail().equals(user.getUsername())) {
+                throw new InvalidUserException();
+            }
+            taskRepository.delete(task);
+        }, () -> {
             throw new TaskNotFoundException();
         });
     }

@@ -5,7 +5,7 @@ import com.badzianga.todo.model.Task;
 import com.badzianga.todo.request.AddTaskRequest;
 import com.badzianga.todo.request.UpdateTaskRequest;
 import com.badzianga.todo.response.ApiResponse;
-import com.badzianga.todo.service.ITaskService;
+import com.badzianga.todo.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
-    private final ITaskService taskService;
+    private final TaskService taskService;
 
     @GetMapping
     public ResponseEntity<ApiResponse> getTasks(@AuthenticationPrincipal UserDetails user,
@@ -31,11 +31,8 @@ public class TaskController {
                                                     Pageable pageable,
                                                 @RequestParam(required = false) Boolean done,
                                                 @RequestParam(required = false) String title) {
-        System.out.println(user.getUsername());
-        System.out.println(user.getPassword());
-        System.out.println(user.getAuthorities());
 
-        Page<Task> tasks = taskService.getTasks(pageable, done, title);
+        Page<Task> tasks = taskService.getTasks(user, pageable, done, title);
         return ResponseEntity.ok(new ApiResponse("Success", tasks));
     }
 
@@ -43,7 +40,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse> getTask(@AuthenticationPrincipal UserDetails user,
                                                @PathVariable Long id) {
         try {
-            Task task = taskService.getTask(id);
+            Task task = taskService.getTask(user, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -53,7 +50,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<ApiResponse> createTask(@AuthenticationPrincipal UserDetails user,
                                                   @Valid @RequestBody AddTaskRequest request) {
-        Task task = taskService.addTask(user.getUsername(), request);
+        Task task = taskService.addTask(user, request);
         return ResponseEntity.ok(new ApiResponse("Success", task));
     }
 
@@ -62,7 +59,7 @@ public class TaskController {
                                                   @PathVariable Long id,
                                                   @Valid @RequestBody UpdateTaskRequest request) {
         try {
-            Task task = taskService.updateTask(request, id);
+            Task task = taskService.updateTask(user, request, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -73,7 +70,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse> updateTaskStatus(@AuthenticationPrincipal UserDetails user,
                                                         @PathVariable Long id) {
         try {
-            Task task = taskService.updateTaskStatus(id);
+            Task task = taskService.updateTaskStatus(user, id);
             return ResponseEntity.ok(new ApiResponse("Success", task));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -84,7 +81,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse> deleteTask(@AuthenticationPrincipal UserDetails user,
                                                   @PathVariable Long id) {
         try {
-            taskService.deleteTask(id);
+            taskService.deleteTask(user, id);
             return ResponseEntity.ok(new ApiResponse("Success", null));
         } catch (TaskNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
